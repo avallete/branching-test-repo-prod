@@ -1,0 +1,39 @@
+name: Supabase Preview Branch (Dependabot)
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  create-branch:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      BRANCH_NAME: dependabot-branch-${{ github.event.pull_request.number }}
+      GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Ensure preview branch exists
+        run: |
+          if npx --yes supabase@beta branches list --project-ref "$SUPABASE_PROJECT_ID" | grep -Fq "$BRANCH_NAME"; then
+            echo "Supabase preview branch already exists: $BRANCH_NAME"
+          else
+            npx --yes supabase@beta branches create \
+              --project-ref "$SUPABASE_PROJECT_ID" \
+              "$BRANCH_NAME"
+          fi
+
+      - name: Associate with PR git branch
+        run: |
+          npx --yes supabase@beta branches update \
+            --project-ref "$SUPABASE_PROJECT_ID" \
+            --git-branch "$GIT_BRANCH" \
+            "$BRANCH_NAME"
