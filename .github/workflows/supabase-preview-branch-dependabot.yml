@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   create-branch:
-    if: github.actor == 'dependabot[bot]'
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -24,6 +24,8 @@ jobs:
 
       - name: Ensure preview branch exists
         run: |
+          set -euo pipefail
+
           if npx --yes "supabase@$SUPABASE_CLI_VERSION" branches list --project-ref "$SUPABASE_PROJECT_ID" | grep -Fq "$BRANCH_NAME"; then
             echo "Supabase preview branch already exists: $BRANCH_NAME"
           else
@@ -34,6 +36,8 @@ jobs:
 
       - name: Associate with PR git branch
         run: |
+          set -euo pipefail
+
           npx --yes "supabase@$SUPABASE_CLI_VERSION" branches update \
             --project-ref "$SUPABASE_PROJECT_ID" \
             --git-branch "$GIT_BRANCH" \
