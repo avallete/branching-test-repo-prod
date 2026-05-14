@@ -23,13 +23,13 @@ jobs:
 
       - name: Create preview branch
         run: |
-          npx supabase@beta branches create \
+          npx supabase branches create \
             --project-ref "$SUPABASE_PROJECT_ID" \
             "$BRANCH_NAME"
 
       - name: Associate with PR git branch
         run: |
-          npx supabase@beta branches update \
+          npx supabase branches update \
             --project-ref "$SUPABASE_PROJECT_ID" \
             --git-branch "$GIT_BRANCH" \
             "$BRANCH_NAME"
