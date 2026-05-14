@@ -1,7 +1,7 @@
 name: Supabase Preview Branch (Dependabot)
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, reopened]
 
 permissions:
@@ -9,12 +9,11 @@ permissions:
 
 jobs:
   create-branch:
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-      SUPABASE_CLI_VERSION: 2.98.2
       BRANCH_NAME: dependabot-branch-${{ github.event.pull_request.number }}
       GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
     steps:
@@ -22,25 +21,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Ensure preview branch exists
+      - name: Create preview branch
         run: |
-          set -euo pipefail
-
-          branch_list="$(npx --yes "supabase@$SUPABASE_CLI_VERSION" branches list --project-ref "$SUPABASE_PROJECT_ID")"
-
-          if printf '%s\n' "$branch_list" | grep -Fq "$BRANCH_NAME"; then
-            echo "Supabase preview branch already exists: $BRANCH_NAME"
-          else
-            npx --yes "supabase@$SUPABASE_CLI_VERSION" branches create \
-              --project-ref "$SUPABASE_PROJECT_ID" \
-              "$BRANCH_NAME"
-          fi
+          npx supabase@beta branches create \
+            --project-ref "$SUPABASE_PROJECT_ID" \
+            "$BRANCH_NAME"
 
       - name: Associate with PR git branch
         run: |
-          set -euo pipefail
-
-          npx --yes "supabase@$SUPABASE_CLI_VERSION" branches update \
+          npx supabase@beta branches update \
             --project-ref "$SUPABASE_PROJECT_ID" \
             --git-branch "$GIT_BRANCH" \
             "$BRANCH_NAME"
