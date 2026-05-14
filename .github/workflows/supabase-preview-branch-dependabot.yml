@@ -1,7 +1,7 @@
 name: Supabase Preview Branch (Dependabot)
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened]
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
       BRANCH_NAME: dependabot-branch-${{ github.event.pull_request.number }}
       GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
 
