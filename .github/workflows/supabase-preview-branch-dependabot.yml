@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   create-branch:
-    if: github.actor == 'dependabot[bot]'
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
